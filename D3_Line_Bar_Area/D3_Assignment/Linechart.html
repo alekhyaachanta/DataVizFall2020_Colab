@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>linechart</title>
+    <script src="Libs/d3/d3.min.js"></script>
+</head>
+<body>
+<div id="container" style="width:100%">
+    <svg width="50%" height="80%" style="background-color: #efefef"
+        viewBox="0 0 1000 500">
+    </svg>
+</div>
+<script>
+    let svg = d3.selectAll('svg');
+    d3.csv("Data/data_sample.csv",d3.autoType).then
+(
+    function (data)
+    {
+        //PADDING
+        let padding = 45;
+        //SCALING
+        let max_estimatedcost = d3.max(d3.map(data,function(d){return d.EstimatedCost}))
+        let max_rawmaterials = d3.max(d3.map(data,function(d){return d.RawMaterial}))
+        let max = d3.max([max_estimatedcost,max_rawmaterials])
+        //console.log(max_estimatedcost)
+        let dates_min_max = d3.extent(data,function(d){return d.date;})
+        console.log(dates_min_max)
+        let scaleDates = d3.scaleTime().domain(dates_min_max).range([padding,1000-padding])
+        let scaleY = d3.scaleLinear().domain([0,max]).range([500-padding,padding])
+        //LINE CHARTS
+        let line_Estimated = d3.line()
+                                .x(function (d){return scaleDates(d.date)})
+                                .y(function (d){return scaleY(d.EstimatedCost)})
+
+        let line_RawMaterial = d3.line()
+                                .x(function (d){return scaleDates(d.date)})
+                                .y(function (d){return scaleY(d.RawMaterial)})
+/*
+        let line_Workmanship = d3.line()
+            .x(function (d){return scaleDates(d.date)})
+            .y(function (d){return scaleY(d.Workmanship)})
+
+        let line_YearlyStorage = d3.line()
+            .x(function (d){return scaleDates(d.date)})
+            .y(function (d){return scale(d.YearlyStorage)})
+
+*/
+        //CREATING PATHS
+        let EstimatedCost_path = svg.append('path')
+                        .data([data])
+                        .attr("d",line_Estimated)
+                        .style("fill","none")
+                        .style("stroke","black")
+                        .style("stroke-width","2px")
+
+        let Rawmaterial_path = svg.append('path')
+            .data([data])
+            .attr("d",line_RawMaterial)
+            .style("fill","none")
+            .style("stroke","green")
+            .style("stroke-width","2px")
+/*
+        let Workmanship_path = svg.append('path')
+            .data([data])
+            .attr("d",line_Workmanship)
+            .style("fill","none")
+            .style("stroke","red")
+            .style("stroke-width","2px")
+
+        let YearlyStorage_path = svg.append('path')
+            .data([data])
+            .attr("d",line_YearlyStorage)
+            .style("fill","none")
+            .style("stroke","yellow")
+            .style("stroke-width","2px")
+
+
+*/
+        //axis
+        svg
+            .append("g")
+            .attr("transform", "translate(0,480)")      // This controls the vertical position of the Axis
+            .call(d3.axisBottom(scaleDates));
+
+        svg.append("g").attr("transform", "translate(40,0)").call(d3.axisLeft(scaleY));
+
+
+    }
+)
+
+</script>
+</body>
+</html>
